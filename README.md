@@ -1,5 +1,9 @@
 React.js component offering mobile and desktop browser voice and video communication. Wraps [sip.js](https://sipjs.com) with the nitty gritty details required make it work in such environments to help focus on application development.
 
+To get started:
+
+`$ npm install iotcomms-react-webrtc --save`
+
 The component has been tested to work in combinations of the following web browsers updated to latest versions with video and voice calls:
 
 * Safari on iOS
@@ -61,3 +65,5 @@ When the component has mounted and have connection with the server a "Call" butt
 Upon incoming calls an "Answer" button is rendered.
 
 The component will try to play out audio and video feedback when calling and alerting incoming calls. Due to autoplay limitations and logic in different web browsers this may not play.
+
+*This project is sponsored by [iotcomms.io](https://iotcomms.io).*
