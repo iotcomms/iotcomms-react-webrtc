@@ -1,0 +1,1 @@
+React.js component offering mobile and desktop browser voice and video communication. Wraps sip.js with the nitty gritty details required make it work in such environments to help focus on application development.
