@@ -1,5 +1,7 @@
 React.js component offering mobile and desktop browser voice and video communication. Wraps [sip.js](https://sipjs.com) with the nitty gritty details required make it work in such environments to help focus on application development.
 
+An example application is [found here](https://github.com/iotcomms/iotcomms-react-webrtc-example)
+
 To get started:
 
 `$ npm install iotcomms-react-webrtc --save`
