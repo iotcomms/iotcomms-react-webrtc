@@ -61,8 +61,13 @@ var WebRTCClient = function (_Component) {
 
     var _this = _possibleConstructorReturn(this, (WebRTCClient.__proto__ || Object.getPrototypeOf(WebRTCClient)).call(this, props, context));
 
+    var sipServer = props.sipDomain;
+    if (props.sipServer) {
+      sipServer = props.sipServer;
+    }
+
     _this.state = {
-      userid: props.sipUser, video: props.video, domain: props.sipDomain,
+      userid: props.sipUser, video: props.video, domain: props.sipDomain, sipServer: sipServer,
       password: props.sipPassword, destination: props.destination,
       autoRegister: props.autoRegister, callState: "Idle",
       enableButtons: true
@@ -81,7 +86,7 @@ var WebRTCClient = function (_Component) {
 
         uri: this.state.userid + "@" + this.state.domain,
         transportOptions: {
-          wsServers: ["wss://" + this.state.domain + ":7443/ws"],
+          wsServers: ["wss://" + this.state.sipServer + ":7443/ws"],
           traceSip: true
         },
         sessionDescriptionHandlerFactoryOptions: {
@@ -458,6 +463,7 @@ var WebRTCClient = function (_Component) {
 WebRTCClient.propTypes = {
   sipUser: _propTypes2.default.string.isRequired,
   sipDomain: _propTypes2.default.string.isRequired,
+  sipServer: _propTypes2.default.string,
   sipPassword: _propTypes2.default.string.isRequired,
   video: _propTypes2.default.bool,
   autoRegister: _propTypes2.default.bool,

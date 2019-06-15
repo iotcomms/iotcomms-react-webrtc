@@ -29,8 +29,13 @@ class WebRTCClient extends Component {
 
   constructor(props,context) {
     super(props,context);
+    var sipServer = props.sipDomain;
+    if(props.sipServer) {
+      sipServer=props.sipServer;
+    }
+
     this.state = {
-      userid:props.sipUser,video:props.video,domain:props.sipDomain,
+      userid:props.sipUser,video:props.video,domain:props.sipDomain, sipServer:sipServer,
       password:props.sipPassword,destination:props.destination,
       autoRegister: props.autoRegister,callState:"Idle",
       enableButtons:true
@@ -52,7 +57,7 @@ class WebRTCClient extends Component {
 
       uri: this.state.userid +"@" + this.state.domain,
       transportOptions: {
-        wsServers: ["wss://"+this.state.domain+":7443/ws"],
+        wsServers: ["wss://"+this.state.sipServer+":7443/ws"],
         traceSip:true
       } ,
       sessionDescriptionHandlerFactoryOptions: {
@@ -391,6 +396,7 @@ class WebRTCClient extends Component {
 WebRTCClient.propTypes = {
   sipUser: PropTypes.string.isRequired,
   sipDomain: PropTypes.string.isRequired,
+  sipServer: PropTypes.string,
   sipPassword: PropTypes.string.isRequired,
   video: PropTypes.bool,
   autoRegister: PropTypes.bool,
