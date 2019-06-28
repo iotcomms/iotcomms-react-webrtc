@@ -46,6 +46,7 @@ Below is an example of how to embed the component in a React.js application
           sipUser={sipUser}
           sipPassword={sipPassword}
           destination={destinationUri}
+          metaData={metaDataObject}
         />
       </div>
     );
@@ -63,6 +64,7 @@ where
 * sipServer property - This is an optional property indicating where to connect with the server. If this is not set the value of sipDomain is used.
 * sipUser - is the user id to be used for authentication
 * destination - is the remote destination to be called
+* metaData - is an object to be passed to the remote side in a X-MetaData SIP header. The object is JSON stringified and then URL encoded before inserted as header value.
 
 When the component has mounted and have connection with the server a "Call" button is rendered. When this is pushed a call is placed to the destination configured in the destination property.
 

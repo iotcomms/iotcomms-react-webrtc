@@ -69,6 +69,7 @@ var WebRTCClient = function (_Component) {
     _this.state = {
       userid: props.sipUser, video: props.video, domain: props.sipDomain, sipServer: sipServer,
       password: props.sipPassword, destination: props.destination,
+      metaData: props.metaData,
       autoRegister: props.autoRegister, callState: "Idle",
       enableButtons: true
     };
@@ -272,13 +273,24 @@ var WebRTCClient = function (_Component) {
       remoteVideo.play();
 
       this.handleCall(session);
+
+      var req = session.request;
+      var encodedMeta = req.getHeader("X-MetaData");
+
+      this.setState({ receivedMeta: JSON.parse(decodeURIComponent(encodedMeta)) });
     }
   }, {
     key: "placeCall",
     value: function placeCall() {
 
       this.setState({ callState: "Calling", error: "" });
-      var session = this.sipUa.invite(this.state.destination);
+      var inviteOptions = {};
+      if (this.state.metaData) {
+        inviteOptions.extraHeaders = [];
+        var encodedMeta = encodeURIComponent(JSON.stringify(this.state.metaData));
+        inviteOptions.extraHeaders.push("X-MetaData:" + encodedMeta);
+      }
+      var session = this.sipUa.invite(this.state.destination, inviteOptions);
       this.handleCall(session);
     }
   }, {
@@ -428,7 +440,13 @@ var WebRTCClient = function (_Component) {
             null,
             "Server ",
             this.state.connectionState
-          )
+          ),
+          this.state.receivedMeta ? _react2.default.createElement(
+            "div",
+            null,
+            "Received meta data: ",
+            JSON.stringify(this.state.receivedMeta)
+          ) : null
         );
       } else {
         return _react2.default.createElement(
@@ -464,6 +482,7 @@ WebRTCClient.propTypes = {
   sipUser: _propTypes2.default.string.isRequired,
   sipDomain: _propTypes2.default.string.isRequired,
   sipServer: _propTypes2.default.string,
+  metaData: _propTypes2.default.object,
   sipPassword: _propTypes2.default.string.isRequired,
   video: _propTypes2.default.bool,
   autoRegister: _propTypes2.default.bool,

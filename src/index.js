@@ -37,6 +37,7 @@ class WebRTCClient extends Component {
     this.state = {
       userid:props.sipUser,video:props.video,domain:props.sipDomain, sipServer:sipServer,
       password:props.sipPassword,destination:props.destination,
+      metaData:props.metaData,
       autoRegister: props.autoRegister,callState:"Idle",
       enableButtons:true
     };
@@ -258,12 +259,25 @@ class WebRTCClient extends Component {
 
     this.handleCall(session);
 
+    var req = session.request;
+    var encodedMeta = req.getHeader("X-MetaData");
+
+    this.setState({receivedMeta:JSON.parse(decodeURIComponent(encodedMeta))});
+
+
+
   }
 
   placeCall() {
 
     this.setState({callState:"Calling", error:""});
-    var session = this.sipUa.invite(this.state.destination);
+    var inviteOptions = {};
+    if(this.state.metaData) {
+      inviteOptions.extraHeaders = [];
+      var encodedMeta = encodeURIComponent(JSON.stringify(this.state.metaData));
+      inviteOptions.extraHeaders.push("X-MetaData:"+encodedMeta);
+    }
+    var session = this.sipUa.invite(this.state.destination,inviteOptions);
     this.handleCall(session);
   }
 
@@ -371,6 +385,11 @@ class WebRTCClient extends Component {
           <div>{this.renderCallState()}</div>
           <div>{this.state.error}</div>
           <div>Server {this.state.connectionState}</div>
+
+          {this.state.receivedMeta ?
+            <div>Received meta data: {JSON.stringify(this.state.receivedMeta)}</div> : null
+          }
+
         </div>
       );
     } else {
@@ -397,6 +416,7 @@ WebRTCClient.propTypes = {
   sipUser: PropTypes.string.isRequired,
   sipDomain: PropTypes.string.isRequired,
   sipServer: PropTypes.string,
+  metaData: PropTypes.object,
   sipPassword: PropTypes.string.isRequired,
   video: PropTypes.bool,
   autoRegister: PropTypes.bool,
