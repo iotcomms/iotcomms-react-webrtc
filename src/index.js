@@ -39,7 +39,9 @@ class WebRTCClient extends Component {
       password:props.sipPassword,destination:props.destination,
       metaData:props.metaData,
       autoRegister: props.autoRegister,callState:"Idle",
-      enableButtons:true
+      enableButtons:true,
+      ringbackVideoUrl:props.ringbackVideoUrl,
+      alertVideoUrl:props.alertVideoUrl
     };
   }
 
@@ -253,7 +255,14 @@ class WebRTCClient extends Component {
   incomingCall(session) {
     this.setState({callState:"Alerting"});
     var remoteVideo = document.getElementById("remoteVideo");
-    remoteVideo.src = alert;
+
+    if(this.state.alertVideoUrl) {
+      remoteVideo.src = this.state.alertVideoUrl;
+    } else {
+      remoteVideo.src = alert;
+    }
+
+
     remoteVideo.setAttribute("loop",true);
     remoteVideo.play();
 
@@ -324,7 +333,11 @@ class WebRTCClient extends Component {
         return(<Button  color="primary"  onClick={()=> {
           this.avoidDoubleTap();
           var remoteVideo = document.getElementById("remoteVideo");
-          remoteVideo.src = ringback;
+          if(this.state.ringbackVideoUrl) {
+            remoteVideo.src = this.state.ringbackVideoUrl;
+          } else {
+            remoteVideo.src = ringback;
+          }
           remoteVideo.setAttribute("loop",true);
           remoteVideo.play();
           this.placeCall();
@@ -421,6 +434,8 @@ WebRTCClient.propTypes = {
   video: PropTypes.bool,
   autoRegister: PropTypes.bool,
   destination: PropTypes.string.isRequired,
+  alertVideoUrl: PropTypes.string,
+  ringbackVideoUrl: PropTypes.string,
 
 
 };

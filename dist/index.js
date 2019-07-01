@@ -71,7 +71,9 @@ var WebRTCClient = function (_Component) {
       password: props.sipPassword, destination: props.destination,
       metaData: props.metaData,
       autoRegister: props.autoRegister, callState: "Idle",
-      enableButtons: true
+      enableButtons: true,
+      ringbackVideoUrl: props.ringbackVideoUrl,
+      alertVideoUrl: props.alertVideoUrl
     };
     return _this;
   }
@@ -268,7 +270,13 @@ var WebRTCClient = function (_Component) {
     value: function incomingCall(session) {
       this.setState({ callState: "Alerting" });
       var remoteVideo = document.getElementById("remoteVideo");
-      remoteVideo.src = _alert2.default;
+
+      if (this.state.alertVideoUrl) {
+        remoteVideo.src = this.state.alertVideoUrl;
+      } else {
+        remoteVideo.src = _alert2.default;
+      }
+
       remoteVideo.setAttribute("loop", true);
       remoteVideo.play();
 
@@ -349,7 +357,11 @@ var WebRTCClient = function (_Component) {
             { color: "primary", onClick: function onClick() {
                 _this6.avoidDoubleTap();
                 var remoteVideo = document.getElementById("remoteVideo");
-                remoteVideo.src = _ringback2.default;
+                if (_this6.state.ringbackVideoUrl) {
+                  remoteVideo.src = _this6.state.ringbackVideoUrl;
+                } else {
+                  remoteVideo.src = _ringback2.default;
+                }
                 remoteVideo.setAttribute("loop", true);
                 remoteVideo.play();
                 _this6.placeCall();
@@ -486,7 +498,9 @@ WebRTCClient.propTypes = {
   sipPassword: _propTypes2.default.string.isRequired,
   video: _propTypes2.default.bool,
   autoRegister: _propTypes2.default.bool,
-  destination: _propTypes2.default.string.isRequired
+  destination: _propTypes2.default.string.isRequired,
+  alertVideoUrl: _propTypes2.default.string,
+  ringbackVideoUrl: _propTypes2.default.string
 
 };
 

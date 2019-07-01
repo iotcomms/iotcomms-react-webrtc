@@ -47,6 +47,8 @@ Below is an example of how to embed the component in a React.js application
           sipPassword={sipPassword}
           destination={destinationUri}
           metaData={metaDataObject}
+          alertVideoUrl="alertUrl"
+          ringbackVideoUrl="ringbackUrl"
         />
       </div>
     );
@@ -65,6 +67,8 @@ where
 * sipUser - is the user id to be used for authentication
 * destination - is the remote destination to be called
 * metaData - is an object to be passed to the remote side in a X-MetaData SIP header. The object is JSON stringified and then URL encoded before inserted as header value.
+* alertVideoUrl - is an optional sring with an URL pointing to a video file supported by the  <video> element. This file is played when an inbound call is received. If the property is omitted a default file is played.
+* ringbackVideoUrl - is an optional sring with an URL pointing to a video file supported by the  <video> element. This file is played when an call is placed until it has been answered. If the property is omitted a default file is played.
 
 When the component has mounted and have connection with the server a "Call" button is rendered. When this is pushed a call is placed to the destination configured in the destination property.
 
