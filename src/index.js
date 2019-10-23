@@ -24,24 +24,48 @@ const adapter = require('webrtc-adapter');
 
 
 class WebRTCClient extends Component {
-
-
-
   constructor(props,context) {
     super(props,context);
+
     var sipServer = props.sipDomain;
     if(props.sipServer) {
       sipServer=props.sipServer;
     }
 
+    var webSocketPort = "8089"
+    if(props.webSocketPort) {
+      webSocketPort=props.webSocketPort;
+    }
+
+    var stunServerList;
+    if(props.skipStunServer) {
+      stunServerList = [];
+    } else {
+      if(props.stunServerList) {
+        stunServerList = props.stunServerList
+      } else {
+        stunServerList = [{urls: "stun:stun.l.google.com:19302"}]
+      }
+    }
+
     this.state = {
-      userid:props.sipUser,video:props.video,domain:props.sipDomain, sipServer:sipServer,
-      password:props.sipPassword,destination:props.destination,
-      metaData:props.metaData,
-      autoRegister: props.autoRegister,callState:"Idle",
-      enableButtons:true,
-      ringbackVideoUrl:props.ringbackVideoUrl,
-      alertVideoUrl:props.alertVideoUrl
+      userid: props.sipUser,
+      audio: props.enableSound,
+      video: props.enableVideo,
+      domain: props.sipDomain,
+      sipServer: sipServer,
+      webSocketPort: webSocketPort,
+      password: props.sipPassword,
+      destination: props.destination,
+      metaData: props.metaData,
+      autoRegister: props.autoRegister,
+      callState: "Idle",
+      enableButtons: true,
+      ringbackVideoUrl: props.ringbackVideoUrl,
+      alertVideoUrl: props.alertVideoUrl,
+      localVideoTagId: props.localVideoTagId,
+      remoteVideoTagId: props.remoteVideoTagId,
+      stunServer: stunServerList
     };
   }
 
@@ -50,42 +74,32 @@ class WebRTCClient extends Component {
   componentDidMount() {
     this.testMedia();
 
-
-
-
-
-
     var options = {
-
-
-      uri: this.state.userid +"@" + this.state.domain,
+      uri: this.state.userid + "@" + this.state.domain,
       transportOptions: {
-        wsServers: ["wss://"+this.state.sipServer+":7443/ws"],
-        traceSip:true
+        wsServers: ["wss://" + this.state.sipServer + ":" + this.state.webSocketPort + "/ws"],
+        traceSip: true
       } ,
       sessionDescriptionHandlerFactoryOptions: {
         peerConnectionOptions :{
           iceCheckingTimeout: 500,
           rtcConfiguration : {
-            iceServers : [{urls: "stun:stun.l.google.com:19302"}]
+            iceServers : this.state.stunServer
           }
         },
 
         constraints: {
-          audio: true,
+          audio: this.state.audio,
           video: this.state.video
         }
       },
 
       authorizationUser: this.state.userid,
       password: this.state.password,
-      register:this.state.autoRegister,
+      register: this.state.autoRegister,
       autostart: false,
       //hackIpInContact:true,
       hackWssInTransport:true
-
-
-
     };
 
     this.connectionStateChanged("Disconnected");
@@ -125,15 +139,11 @@ class WebRTCClient extends Component {
 
     this.sipUa.start();
 
-
-
-
     //this.setState({userid: localStorage.getItem('userid'), domain: localStorage.getItem('domain'),websocket: localStorage.getItem('websocket'),routes: localStorage.getItem('routes'), password: localStorage.getItem('password')},()=>{this.updateSIPSettings()});
   }
 
   connectionStateChanged(newState) {
     this.setState({connectionState:newState});
-
   }
 
 
