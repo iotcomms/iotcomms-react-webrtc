@@ -49,6 +49,11 @@ Below is an example of how to embed the component in a React.js application
           metaData={metaDataObject}
           alertVideoUrl="alertUrl"
           ringbackVideoUrl="ringbackUrl"
+          hideConnectionStatus={false}
+          traceSip={false}
+          callLabel="Custom call label"
+          remoteVideo="remoteVideoElementId"
+          localVideo="localVideoElementId"
         />
       </div>
     );
@@ -67,8 +72,13 @@ where
 * sipUser - is the user id to be used for authentication
 * destination - is the remote destination to be called
 * metaData - is an object to be passed to the remote side in a X-MetaData SIP header. The object is JSON stringified and then URL encoded before inserted as header value.
-* alertVideoUrl - is an optional sring with an URL pointing to a video file supported by the  <video> element. This file is played when an inbound call is received. If the property is omitted a default file is played.
-* ringbackVideoUrl - is an optional sring with an URL pointing to a video file supported by the  <video> element. This file is played when an call is placed until it has been answered. If the property is omitted a default file is played.
+* alertVideoUrl - is an optional string with an URL pointing to a video file supported by the  <video> element. This file is played when an inbound call is received. If the property is omitted a default file is played.
+* ringbackVideoUrl - is an optional string with an URL pointing to a video file supported by the  <video> element. This file is played when an call is placed until it has been answered. If the property is omitted a default file is played.
+* hideConnectionStatus - is an optional boolean to indicate if the connection status information should be shown or not.
+* traceSip - is an optional boolean to control if SIP messages should be shown in console output
+* callLabel - is an optional string of text to be rendered on the call button
+* remoteVideo - is an optional string with id of the video element that the remote video will be rendered in
+* localVideo - is an optional string with id of the video element that the local video will be rendered in
 
 When the component has mounted and have connection with the server a "Call" button is rendered. When this is pushed a call is placed to the destination configured in the destination property.
 

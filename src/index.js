@@ -34,6 +34,23 @@ class WebRTCClient extends Component {
       sipServer=props.sipServer;
     }
 
+    var callLabel = "Call";
+    if(this.props.callLabel) {
+      callLabel = this.props.callLabel;
+    }
+
+
+    var remoteVideo = "remoteVideo";
+    if(props.remoteVideo) {
+      remoteVideo = props.remoteVideo;
+    }
+
+    var localVideo = "localVideo";
+    if(props.localVideo) {
+      localVideo = props.localVideo;
+    }
+
+
     this.state = {
       userid:props.sipUser,video:props.video,domain:props.sipDomain, sipServer:sipServer,
       password:props.sipPassword,destination:props.destination,
@@ -41,8 +58,13 @@ class WebRTCClient extends Component {
       autoRegister: props.autoRegister,callState:"Idle",
       enableButtons:true,
       ringbackVideoUrl:props.ringbackVideoUrl,
-      alertVideoUrl:props.alertVideoUrl
+      alertVideoUrl:props.alertVideoUrl,
+      hideConnectionStatus: props.hideConnectionStatus,
+      callLabel: callLabel,
+      remoteVideo : remoteVideo,
+      localVideo: localVideo
     };
+
   }
 
 
@@ -53,15 +75,16 @@ class WebRTCClient extends Component {
 
 
 
-
+    var traceSip = false;
+    if(this.props.traceSip) {
+      traceSip = this.props.traceSip;
+    }
 
     var options = {
-
-
       uri: this.state.userid +"@" + this.state.domain,
       transportOptions: {
         wsServers: ["wss://"+this.state.sipServer+":7443/ws"],
-        traceSip:true
+        traceSip:traceSip
       } ,
       sessionDescriptionHandlerFactoryOptions: {
         peerConnectionOptions :{
@@ -171,13 +194,13 @@ class WebRTCClient extends Component {
 
 
   handleCall(session) {
-    var localVideo = document.getElementById("localVideo");
+    var localVideo = document.getElementById(this.state.localVideo);
     this.currentSession = session;
 
 
     this.currentSession.on("terminated", () => {
-      var localVideo = document.getElementById("localVideo");
-      var remoteVideo = document.getElementById("remoteVideo");
+      var localVideo = document.getElementById(this.state.localVideo);
+      var remoteVideo = document.getElementById(this.state.remoteVideo);
       localVideo.src="";
       localVideo.srcObject = null;
       remoteVideo.pause();
@@ -254,7 +277,7 @@ class WebRTCClient extends Component {
 
   incomingCall(session) {
     this.setState({callState:"Alerting"});
-    var remoteVideo = document.getElementById("remoteVideo");
+    var remoteVideo = document.getElementById(this.state.remoteVideo);
 
     if(this.state.alertVideoUrl) {
       remoteVideo.src = this.state.alertVideoUrl;
@@ -294,7 +317,7 @@ class WebRTCClient extends Component {
   callConnected() {
     if(this.remoteStream) {
       try {
-        var remoteVideo = document.getElementById("remoteVideo");
+        var remoteVideo = document.getElementById(this.state.remoteVideo);
         remoteVideo.srcObject = this.remoteStream;
         remoteVideo.play().catch(()=>{});
         // eslint-disable-next-line
@@ -332,7 +355,7 @@ class WebRTCClient extends Component {
       if(this.state.callState === "Idle") {
         return(<Button  color="primary"  onClick={()=> {
           this.avoidDoubleTap();
-          var remoteVideo = document.getElementById("remoteVideo");
+          var remoteVideo = document.getElementById(this.state.remoteVideo);
           if(this.state.ringbackVideoUrl) {
             remoteVideo.src = this.state.ringbackVideoUrl;
           } else {
@@ -341,7 +364,7 @@ class WebRTCClient extends Component {
           remoteVideo.setAttribute("loop",true);
           remoteVideo.play();
           this.placeCall();
-        }}>Call</Button> );
+        }}>{this.state.callLabel}</Button> );
       }
 
 
@@ -395,9 +418,12 @@ class WebRTCClient extends Component {
         <div>
           {this.state.connectionState === "Connected" ?
             this.renderCallButtons() : null }
-          <div>{this.renderCallState()}</div>
-          <div>{this.state.error}</div>
-          <div>Server {this.state.connectionState}</div>
+          {!this.state.hideConnectionStatus ?
+            <span>
+              <div>{this.renderCallState()}</div>
+              <div>{this.state.error}</div>
+              <div>Server {this.state.connectionState}</div>
+            </span> : null }
 
           {this.state.receivedMeta ?
             <div>Received meta data: {JSON.stringify(this.state.receivedMeta)}</div> : null
@@ -436,6 +462,11 @@ WebRTCClient.propTypes = {
   destination: PropTypes.string.isRequired,
   alertVideoUrl: PropTypes.string,
   ringbackVideoUrl: PropTypes.string,
+  hideConnectionStatus: PropTypes.bool,
+  traceSip: PropTypes.bool,
+  callLabel: PropTypes.string,
+  remoteVideo: PropTypes.string,
+  localVideo: PropTypes.string
 
 
 };

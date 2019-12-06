@@ -66,6 +66,21 @@ var WebRTCClient = function (_Component) {
       sipServer = props.sipServer;
     }
 
+    var callLabel = "Call";
+    if (_this.props.callLabel) {
+      callLabel = _this.props.callLabel;
+    }
+
+    var remoteVideo = "remoteVideo";
+    if (props.remoteVideo) {
+      remoteVideo = props.remoteVideo;
+    }
+
+    var localVideo = "localVideo";
+    if (props.localVideo) {
+      localVideo = props.localVideo;
+    }
+
     _this.state = {
       userid: props.sipUser, video: props.video, domain: props.sipDomain, sipServer: sipServer,
       password: props.sipPassword, destination: props.destination,
@@ -73,8 +88,13 @@ var WebRTCClient = function (_Component) {
       autoRegister: props.autoRegister, callState: "Idle",
       enableButtons: true,
       ringbackVideoUrl: props.ringbackVideoUrl,
-      alertVideoUrl: props.alertVideoUrl
+      alertVideoUrl: props.alertVideoUrl,
+      hideConnectionStatus: props.hideConnectionStatus,
+      callLabel: callLabel,
+      remoteVideo: remoteVideo,
+      localVideo: localVideo
     };
+
     return _this;
   }
 
@@ -85,12 +105,16 @@ var WebRTCClient = function (_Component) {
 
       this.testMedia();
 
-      var options = {
+      var traceSip = false;
+      if (this.props.traceSip) {
+        traceSip = this.props.traceSip;
+      }
 
+      var options = {
         uri: this.state.userid + "@" + this.state.domain,
         transportOptions: {
           wsServers: ["wss://" + this.state.sipServer + ":7443/ws"],
-          traceSip: true
+          traceSip: traceSip
         },
         sessionDescriptionHandlerFactoryOptions: {
           peerConnectionOptions: {
@@ -192,12 +216,12 @@ var WebRTCClient = function (_Component) {
     value: function handleCall(session) {
       var _this4 = this;
 
-      var localVideo = document.getElementById("localVideo");
+      var localVideo = document.getElementById(this.state.localVideo);
       this.currentSession = session;
 
       this.currentSession.on("terminated", function () {
-        var localVideo = document.getElementById("localVideo");
-        var remoteVideo = document.getElementById("remoteVideo");
+        var localVideo = document.getElementById(_this4.state.localVideo);
+        var remoteVideo = document.getElementById(_this4.state.remoteVideo);
         localVideo.src = "";
         localVideo.srcObject = null;
         remoteVideo.pause();
@@ -269,7 +293,7 @@ var WebRTCClient = function (_Component) {
     key: "incomingCall",
     value: function incomingCall(session) {
       this.setState({ callState: "Alerting" });
-      var remoteVideo = document.getElementById("remoteVideo");
+      var remoteVideo = document.getElementById(this.state.remoteVideo);
 
       if (this.state.alertVideoUrl) {
         remoteVideo.src = this.state.alertVideoUrl;
@@ -306,7 +330,7 @@ var WebRTCClient = function (_Component) {
     value: function callConnected() {
       if (this.remoteStream) {
         try {
-          var remoteVideo = document.getElementById("remoteVideo");
+          var remoteVideo = document.getElementById(this.state.remoteVideo);
           remoteVideo.srcObject = this.remoteStream;
           remoteVideo.play().catch(function () {});
           // eslint-disable-next-line
@@ -356,7 +380,7 @@ var WebRTCClient = function (_Component) {
             _Button2.default,
             { color: "primary", onClick: function onClick() {
                 _this6.avoidDoubleTap();
-                var remoteVideo = document.getElementById("remoteVideo");
+                var remoteVideo = document.getElementById(_this6.state.remoteVideo);
                 if (_this6.state.ringbackVideoUrl) {
                   remoteVideo.src = _this6.state.ringbackVideoUrl;
                 } else {
@@ -366,7 +390,7 @@ var WebRTCClient = function (_Component) {
                 remoteVideo.play();
                 _this6.placeCall();
               } },
-            "Call"
+            this.state.callLabel
           );
         }
 
@@ -437,22 +461,26 @@ var WebRTCClient = function (_Component) {
           "div",
           null,
           this.state.connectionState === "Connected" ? this.renderCallButtons() : null,
-          _react2.default.createElement(
-            "div",
+          !this.state.hideConnectionStatus ? _react2.default.createElement(
+            "span",
             null,
-            this.renderCallState()
-          ),
-          _react2.default.createElement(
-            "div",
-            null,
-            this.state.error
-          ),
-          _react2.default.createElement(
-            "div",
-            null,
-            "Server ",
-            this.state.connectionState
-          ),
+            _react2.default.createElement(
+              "div",
+              null,
+              this.renderCallState()
+            ),
+            _react2.default.createElement(
+              "div",
+              null,
+              this.state.error
+            ),
+            _react2.default.createElement(
+              "div",
+              null,
+              "Server ",
+              this.state.connectionState
+            )
+          ) : null,
           this.state.receivedMeta ? _react2.default.createElement(
             "div",
             null,
@@ -500,7 +528,12 @@ WebRTCClient.propTypes = {
   autoRegister: _propTypes2.default.bool,
   destination: _propTypes2.default.string.isRequired,
   alertVideoUrl: _propTypes2.default.string,
-  ringbackVideoUrl: _propTypes2.default.string
+  ringbackVideoUrl: _propTypes2.default.string,
+  hideConnectionStatus: _propTypes2.default.bool,
+  traceSip: _propTypes2.default.bool,
+  callLabel: _propTypes2.default.string,
+  remoteVideo: _propTypes2.default.string,
+  localVideo: _propTypes2.default.string
 
 };
 
