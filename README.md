@@ -41,6 +41,7 @@ Below is an example of how to embed the component in a React.js application
         <WebRTCClient
           video={true}
           autoRegister = {true}
+          autoConnect = {false}
           sipDomain={sipDomain}
           sipServer={sipServer}
           sipUser={sipUser}
@@ -67,6 +68,7 @@ where
 * The video elements must have the id's and attributes as provided in the example
 * video property - indicates if video should be enabled for calls. If not, it will use voice only
 * autoRegister property - indicates if the component should send a SIP Register to be able to receive calls
+* autoConnect property - indicates if the component automatically should place a call ti the configured destination
 * sipDomain property - is the SIP domain to be used for registration and calls
 * sipServer property - This is an optional property indicating where to connect with the server. If this is not set the value of sipDomain is used.
 * sipUser - is the user id to be used for authentication

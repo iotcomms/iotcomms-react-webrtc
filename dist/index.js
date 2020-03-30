@@ -154,8 +154,13 @@ var WebRTCClient = function (_Component) {
         });
 
         transport.on("connected", function () {
+          console.log("Transport connected, props", _this2.props);
           _this2.connectionStateChanged("Connected");
           _this2.setState({ error: "" });
+          if (_this2.props.autoConnect) {
+            console.log("Auto connecting");
+            _this2.placeCall();
+          }
         });
 
         transport.on("disconnecting", function () {
@@ -526,6 +531,7 @@ WebRTCClient.propTypes = {
   sipPassword: _propTypes2.default.string.isRequired,
   video: _propTypes2.default.bool,
   autoRegister: _propTypes2.default.bool,
+  autoConnect: _propTypes2.default.bool,
   destination: _propTypes2.default.string.isRequired,
   alertVideoUrl: _propTypes2.default.string,
   ringbackVideoUrl: _propTypes2.default.string,

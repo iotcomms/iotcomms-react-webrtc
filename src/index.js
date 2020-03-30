@@ -127,8 +127,13 @@ class WebRTCClient extends Component {
       });
 
       transport.on("connected", () => {
+        console.log("Transport connected, props",this.props);
         this.connectionStateChanged("Connected");
         this.setState({error:""});
+        if(this.props.autoConnect) {
+          console.log("Auto connecting");
+          this.placeCall();
+        }
       });
 
       transport.on("disconnecting", () => {
@@ -140,13 +145,20 @@ class WebRTCClient extends Component {
       });
 
 
+
+
     });
 
     this.sipUa.on("invite", (session)=>{
       this.incomingCall(session);
     });
 
+
+
+
     this.sipUa.start();
+
+
 
 
 
@@ -459,6 +471,7 @@ WebRTCClient.propTypes = {
   sipPassword: PropTypes.string.isRequired,
   video: PropTypes.bool,
   autoRegister: PropTypes.bool,
+  autoConnect: PropTypes.bool,
   destination: PropTypes.string.isRequired,
   alertVideoUrl: PropTypes.string,
   ringbackVideoUrl: PropTypes.string,
