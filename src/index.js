@@ -55,6 +55,7 @@ class WebRTCClient extends Component {
       userid:props.sipUser,video:props.video,domain:props.sipDomain, sipServer:sipServer,
       password:props.sipPassword,destination:props.destination,
       metaData:props.metaData,
+      jwtAuth: props.jwtAuth,
       autoRegister: props.autoRegister,callState:"Idle",
       enableButtons:true,
       ringbackVideoUrl:props.ringbackVideoUrl,
@@ -316,11 +317,16 @@ class WebRTCClient extends Component {
 
     this.setState({callState:"Calling", error:""});
     var inviteOptions = {};
+    inviteOptions.extraHeaders = [];
     if(this.state.metaData) {
-      inviteOptions.extraHeaders = [];
       var encodedMeta = encodeURIComponent(JSON.stringify(this.state.metaData));
       inviteOptions.extraHeaders.push("X-MetaData:"+encodedMeta);
     }
+
+    if(this.state.jwtAuth) {
+      inviteOptions.extraHeaders.push("X-JWTAuth:"+this.state.jwtAuth);
+    }
+
     var session = this.sipUa.invite(this.state.destination,inviteOptions);
     this.handleCall(session);
   }
@@ -479,7 +485,8 @@ WebRTCClient.propTypes = {
   traceSip: PropTypes.bool,
   callLabel: PropTypes.string,
   remoteVideo: PropTypes.string,
-  localVideo: PropTypes.string
+  localVideo: PropTypes.string,
+  jwtAuth: PropTypes.object
 
 
 };

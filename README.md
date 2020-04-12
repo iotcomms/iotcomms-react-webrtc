@@ -55,6 +55,7 @@ Below is an example of how to embed the component in a React.js application
           callLabel="Custom call label"
           remoteVideo="remoteVideoElementId"
           localVideo="localVideoElementId"
+          jwtAuth="JWTAuthToken"
         />
       </div>
     );
@@ -81,6 +82,7 @@ where
 * callLabel - is an optional string of text to be rendered on the call button
 * remoteVideo - is an optional string with id of the video element that the remote video will be rendered in
 * localVideo - is an optional string with id of the video element that the local video will be rendered in
+* jwtAuth - is an optional string holding a JWT authorization token used by the service to authorize requests
 
 When the component has mounted and have connection with the server a "Call" button is rendered. When this is pushed a call is placed to the destination configured in the destination property.
 
