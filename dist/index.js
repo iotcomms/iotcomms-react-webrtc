@@ -133,10 +133,10 @@ var WebRTCClient = function (_Component) {
 
         authorizationUser: this.state.userid,
         password: this.state.password,
-        register: this.state.autoRegister,
         autostart: false,
         //hackIpInContact:true,
-        hackWssInTransport: true
+        hackWssInTransport: true,
+        register: false
 
       };
 
@@ -158,6 +158,10 @@ var WebRTCClient = function (_Component) {
           console.log("Transport connected, props", _this2.props);
           _this2.connectionStateChanged("Connected");
           _this2.setState({ error: "" });
+          if (_this2.props.autoRegister) {
+            _this2.register();
+          }
+
           if (_this2.props.autoConnect) {
             console.log("Auto connecting");
             _this2.placeCall();
@@ -316,6 +320,17 @@ var WebRTCClient = function (_Component) {
       var encodedMeta = req.getHeader("X-MetaData");
 
       this.setState({ receivedMeta: JSON.parse(decodeURIComponent(encodedMeta)) });
+    }
+  }, {
+    key: "register",
+    value: function register() {
+      var registerOptions = {};
+      registerOptions.extraHeaders = [];
+      if (this.state.jwtAuth) {
+        registerOptions.extraHeaders.push("X-JWTAuth:" + this.state.jwtAuth);
+      }
+
+      this.sipUa.register(registerOptions);
     }
   }, {
     key: "placeCall",

@@ -103,10 +103,10 @@ class WebRTCClient extends Component {
 
       authorizationUser: this.state.userid,
       password: this.state.password,
-      register:this.state.autoRegister,
       autostart: false,
       //hackIpInContact:true,
-      hackWssInTransport:true
+      hackWssInTransport:true,
+      register: false
 
 
 
@@ -131,6 +131,10 @@ class WebRTCClient extends Component {
         console.log("Transport connected, props",this.props);
         this.connectionStateChanged("Connected");
         this.setState({error:""});
+        if(this.props.autoRegister) {
+          this.register();
+        }
+
         if(this.props.autoConnect) {
           console.log("Auto connecting");
           this.placeCall();
@@ -309,6 +313,18 @@ class WebRTCClient extends Component {
 
     this.setState({receivedMeta:JSON.parse(decodeURIComponent(encodedMeta))});
 
+
+
+  }
+
+  register() {
+    var registerOptions = {};
+    registerOptions.extraHeaders = [];
+    if(this.state.jwtAuth) {
+      registerOptions.extraHeaders.push("X-JWTAuth:"+this.state.jwtAuth);
+    }
+
+    this.sipUa.register(registerOptions);
 
 
   }
