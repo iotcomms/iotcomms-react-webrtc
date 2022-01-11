@@ -91,6 +91,7 @@ var WebRTCClient = function (_Component) {
       ringbackVideoUrl: props.ringbackVideoUrl,
       alertVideoUrl: props.alertVideoUrl,
       hideConnectionStatus: props.hideConnectionStatus,
+      hideControls: props.hideControls,
       callLabel: callLabel,
       remoteVideo: remoteVideo,
       localVideo: localVideo
@@ -100,6 +101,14 @@ var WebRTCClient = function (_Component) {
   }
 
   _createClass(WebRTCClient, [{
+    key: "componentDidUpdate",
+    value: function componentDidUpdate(prevProps) {
+      console.log("componentDidUpdate prevProps", prevProps, "props", this.props);
+      if (this.props.hangupCallNow && this.state.callState == "InCall") {
+        this.hangupCall();
+      }
+    }
+  }, {
     key: "componentDidMount",
     value: function componentDidMount() {
       var _this2 = this;
@@ -215,6 +224,7 @@ var WebRTCClient = function (_Component) {
   }, {
     key: "hangupCall",
     value: function hangupCall() {
+      console.log("hangupCall called");
 
       try {
         this.currentSession.terminate();
@@ -241,11 +251,21 @@ var WebRTCClient = function (_Component) {
         remoteVideo.removeAttribute("loop");
 
         _this4.setState({ callState: "Idle" });
+
+        if (_this4.props.onDisconnected) {
+          console.log("invoking onDisconnected callback");
+          _this4.props.onDisconnected(_this4);
+        }
       });
 
       this.currentSession.on("accepted", function () {
         _this4.setState({ callState: "InCall" });
         _this4.callConnected();
+
+        if (_this4.props.onConnected) {
+          console.log("invoking onConnected callback");
+          _this4.props.onConnected(_this4);
+        }
       });
 
       this.currentSession.on("cancel", function () {
@@ -300,9 +320,22 @@ var WebRTCClient = function (_Component) {
       }
     }
   }, {
+    key: "getHeaderValue",
+    value: function getHeaderValue(header) {
+      if (this.req) {
+        return this.req.getHeader(header);
+      }
+    }
+  }, {
     key: "incomingCall",
     value: function incomingCall(session) {
       this.setState({ callState: "Alerting" });
+
+      if (this.props.onConnecting) {
+        console.log("invoking onConnecting callback");
+        this.props.onConnecting(this);
+      }
+
       var remoteVideo = document.getElementById(this.state.remoteVideo);
 
       if (this.state.alertVideoUrl) {
@@ -317,9 +350,21 @@ var WebRTCClient = function (_Component) {
       this.handleCall(session);
 
       var req = session.request;
+      this.req = req;
       var encodedMeta = req.getHeader("X-MetaData");
+      if (encodedMeta) {
+        try {
+          this.setState({ receivedMeta: JSON.parse(decodeURIComponent(encodedMeta)) });
+        } catch (e) {
+          console.warn("Could not parse meta data header");
+        }
+      }
 
-      this.setState({ receivedMeta: JSON.parse(decodeURIComponent(encodedMeta)) });
+      if (this.props.autoAnswer) {
+        console.log("Auto answering");
+        this.answerCall();
+        return;
+      }
     }
   }, {
     key: "register",
@@ -354,6 +399,9 @@ var WebRTCClient = function (_Component) {
   }, {
     key: "callConnected",
     value: function callConnected() {
+
+      console.log("callConnected");
+
       if (this.remoteStream) {
         try {
           var remoteVideo = document.getElementById(this.state.remoteVideo);
@@ -434,7 +482,14 @@ var WebRTCClient = function (_Component) {
             _Button2.default,
             { color: "primary", onClick: function onClick() {
                 _this6.avoidDoubleTap();
-                _this6.hangupCall();
+                if (_this6.props.onHangup) {
+                  var resp = _this6.props.onHangup();
+                  if (resp == true) {
+                    _this6.hangupCall();
+                  }
+                } else {
+                  _this6.hangupCall();
+                }
               } },
             "Hang up"
           );
@@ -486,7 +541,7 @@ var WebRTCClient = function (_Component) {
         return _react2.default.createElement(
           "div",
           null,
-          this.state.connectionState === "Connected" ? this.renderCallButtons() : null,
+          this.state.connectionState === "Connected" && !this.state.hideControls ? this.renderCallButtons() : null,
           !this.state.hideConnectionStatus ? _react2.default.createElement(
             "span",
             null,
@@ -557,11 +612,18 @@ WebRTCClient.propTypes = {
   alertVideoUrl: _propTypes2.default.string,
   ringbackVideoUrl: _propTypes2.default.string,
   hideConnectionStatus: _propTypes2.default.bool,
+  hideControls: _propTypes2.default.bool,
+  autoAnswer: _propTypes2.default.bool,
+  hangupCallNow: _propTypes2.default.bool,
   traceSip: _propTypes2.default.bool,
   callLabel: _propTypes2.default.string,
   remoteVideo: _propTypes2.default.string,
   localVideo: _propTypes2.default.string,
-  jwtAuth: _propTypes2.default.object
+  jwtAuth: _propTypes2.default.object,
+  onConnected: _propTypes2.default.func,
+  onConnecting: _propTypes2.default.func,
+  onDisconnected: _propTypes2.default.func,
+  onHangup: _propTypes2.default.func
 
 };
 

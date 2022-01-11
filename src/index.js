@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 //
 // Copyright (c) IOT Communications International . All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
@@ -61,11 +62,19 @@ class WebRTCClient extends Component {
       ringbackVideoUrl:props.ringbackVideoUrl,
       alertVideoUrl:props.alertVideoUrl,
       hideConnectionStatus: props.hideConnectionStatus,
+      hideControls: props.hideControls,
       callLabel: callLabel,
       remoteVideo : remoteVideo,
       localVideo: localVideo
     };
 
+  }
+
+  componentDidUpdate(prevProps) {
+    console.log("componentDidUpdate prevProps",prevProps, "props",this.props);
+    if(this.props.hangupCallNow && this.state.callState=="InCall") {
+      this.hangupCall();
+    }
   }
 
 
@@ -173,7 +182,6 @@ class WebRTCClient extends Component {
 
   connectionStateChanged(newState) {
     this.setState({connectionState:newState});
-
   }
 
 
@@ -201,6 +209,7 @@ class WebRTCClient extends Component {
   }
 
   hangupCall() {
+    console.log("hangupCall called");
 
 
     try {
@@ -228,11 +237,24 @@ class WebRTCClient extends Component {
 
 
       this.setState({callState:"Idle"});
+
+        
+
+      if(this.props.onDisconnected) {
+        console.log("invoking onDisconnected callback");
+        this.props.onDisconnected(this);
+      }
     });
 
     this.currentSession.on("accepted", () => {
       this.setState({callState:"InCall"});
       this.callConnected();
+
+      if(this.props.onConnected) {
+        console.log("invoking onConnected callback");
+        this.props.onConnected(this);
+      }
+
     });
 
     this.currentSession.on("cancel", () => {
@@ -292,8 +314,21 @@ class WebRTCClient extends Component {
   }
 
 
+  getHeaderValue(header) {
+    if(this.req) {
+      return  this.req.getHeader(header);
+    }
+  }
+
   incomingCall(session) {
     this.setState({callState:"Alerting"});
+
+    if(this.props.onConnecting) {
+      console.log("invoking onConnecting callback");
+      this.props.onConnecting(this);
+    }
+
+ 
     var remoteVideo = document.getElementById(this.state.remoteVideo);
 
     if(this.state.alertVideoUrl) {
@@ -309,10 +344,21 @@ class WebRTCClient extends Component {
     this.handleCall(session);
 
     var req = session.request;
+    this.req = req;
     var encodedMeta = req.getHeader("X-MetaData");
+    if(encodedMeta) {
+      try {
+        this.setState({receivedMeta:JSON.parse(decodeURIComponent(encodedMeta))});
+      } catch(e) {
+        console.warn("Could not parse meta data header");
+      }
+    }
 
-    this.setState({receivedMeta:JSON.parse(decodeURIComponent(encodedMeta))});
-
+    if(this.props.autoAnswer) {
+      console.log("Auto answering");
+      this.answerCall();
+      return;
+    }
 
 
   }
@@ -349,6 +395,12 @@ class WebRTCClient extends Component {
 
 
   callConnected() {
+
+
+    console.log("callConnected");
+
+ 
+
     if(this.remoteStream) {
       try {
         var remoteVideo = document.getElementById(this.state.remoteVideo);
@@ -413,7 +465,14 @@ class WebRTCClient extends Component {
       else {
         return(<Button  color="primary"  onClick={()=> {
           this.avoidDoubleTap();
-          this.hangupCall();
+          if(this.props.onHangup) {
+            let resp = this.props.onHangup();
+            if(resp==true) {
+              this.hangupCall();
+            }
+          } else {
+            this.hangupCall();
+          }
         }}>Hang up</Button>);
       }
     } else {
@@ -450,7 +509,7 @@ class WebRTCClient extends Component {
     if(this.state.mediaSupported) {
       return (
         <div>
-          {this.state.connectionState === "Connected" ?
+          {this.state.connectionState === "Connected" && !this.state.hideControls ?
             this.renderCallButtons() : null }
           {!this.state.hideConnectionStatus ?
             <span>
@@ -498,11 +557,18 @@ WebRTCClient.propTypes = {
   alertVideoUrl: PropTypes.string,
   ringbackVideoUrl: PropTypes.string,
   hideConnectionStatus: PropTypes.bool,
+  hideControls: PropTypes.bool,
+  autoAnswer: PropTypes.bool,
+  hangupCallNow: PropTypes.bool,
   traceSip: PropTypes.bool,
   callLabel: PropTypes.string,
   remoteVideo: PropTypes.string,
   localVideo: PropTypes.string,
-  jwtAuth: PropTypes.object
+  jwtAuth: PropTypes.object,
+  onConnected : PropTypes.func,
+  onConnecting : PropTypes.func,
+  onDisconnected: PropTypes.func,
+  onHangup : PropTypes.func
 
 
 };

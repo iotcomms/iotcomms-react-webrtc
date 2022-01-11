@@ -51,11 +51,18 @@ Below is an example of how to embed the component in a React.js application
           alertVideoUrl="alertUrl"
           ringbackVideoUrl="ringbackUrl"
           hideConnectionStatus={false}
+          hideControls={false}
+          autoAnswer={false}
+          hangupCallNow={false}
           traceSip={false}
           callLabel="Custom call label"
           remoteVideo="remoteVideoElementId"
           localVideo="localVideoElementId"
           jwtAuth="JWTAuthToken"
+          onConnected={()=>{}}
+          onConnecting={()=>{}}
+          onDisconnected={()=>{}}
+          onHangup={()=>{}}
         />
       </div>
     );
@@ -78,11 +85,18 @@ where
 * alertVideoUrl - is an optional string with an URL pointing to a video file supported by the  <video> element. This file is played when an inbound call is received. If the property is omitted a default file is played.
 * ringbackVideoUrl - is an optional string with an URL pointing to a video file supported by the  <video> element. This file is played when an call is placed until it has been answered. If the property is omitted a default file is played.
 * hideConnectionStatus - is an optional boolean to indicate if the connection status information should be shown or not.
+* hideControls - if set to true all call control buttons are hidden
+* autoAnswer - if set to true incoming calls are automatically answered
+* hangupCallNow - if this property is set to true any ongoing call will be disconnected
 * traceSip - is an optional boolean to control if SIP messages should be shown in console output
 * callLabel - is an optional string of text to be rendered on the call button
 * remoteVideo - is an optional string with id of the video element that the remote video will be rendered in
 * localVideo - is an optional string with id of the video element that the local video will be rendered in
 * jwtAuth - is an optional string holding a JWT authorization token used by the service to authorize requests
+* onConnected - callback function invoked when a call is connected
+* onConnecting - callback function invoked when a call is connecting 
+* onDisconnected - callback function invoked when a call is disconnected
+* onHangup - callback function invoked when a call is to be disconnected. If false is returned the call disconnect is aborted and call will continue.
 
 When the component has mounted and have connection with the server a "Call" button is rendered. When this is pushed a call is placed to the destination configured in the destination property.
 
